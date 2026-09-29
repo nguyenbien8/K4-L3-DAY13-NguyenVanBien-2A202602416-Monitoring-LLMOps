@@ -19,10 +19,10 @@
 | Evidence | Đường dẫn |
 |---|---|
 | Pytest cuối | `evidence/01-pytest.png` |
-| Log validator | `evidence/02-log-validator.png` |
+| Log validator | [`evidence/02-log-validator.txt`](evidence/02-log-validator.txt) |
 | Dashboard validator | `evidence/03-dashboard-validator.png` |
-| Structured log | `evidence/04-structured-log.png` |
-| PII redaction | `evidence/05-pii-redaction.png` |
+| Structured log | [`evidence/04-structured-log.txt`](evidence/04-structured-log.txt) |
+| PII redaction | [`evidence/05-pii-redaction.txt`](evidence/05-pii-redaction.txt) |
 | Trace list | `evidence/06-trace-list.png` |
 | Trace waterfall | `evidence/07-trace-waterfall.png` |
 | Trace metadata | `evidence/08-trace-metadata.png` |
@@ -37,20 +37,20 @@
 
 | Nội dung | Baseline | Kết quả cuối | Nhận xét |
 |---|---|---|---|
-| `validate_logs.py` | 30/100 — thiếu `correlation_id` (MISSING), thiếu enrichment, 0 correlation ID ([output](evidence/00-baseline-log-validator.txt)) | | |
+| `validate_logs.py` | 30/100 — thiếu `correlation_id` (MISSING), thiếu enrichment, 0 correlation ID ([output](evidence/00-baseline-log-validator.txt)) | 100/100 sau CP1 (23 records, 11 correlation ID, 0 PII leak) | Log baseline được chuyển ra ngoài repo trước khi đo lại |
 | `validate_dashboard.py` | HỢP LỆ 6/6 ([output](evidence/00-baseline-dashboard-validator.txt)) | | |
 | `pytest` | 22 passed ([output](evidence/00-baseline-pytest.txt)) | | |
 | Số traces hợp lệ | | | |
-| Số PII leak | 0 (starter đã dùng `summarize_text` cho preview) | | |
+| Số PII leak | 0 (starter đã dùng `summarize_text` cho preview) | 0 — scrub toàn bộ event trước khi ghi file | Thêm processor + pattern passport, tests cho CCCD/thẻ |
 | Latency P95 / TTFT P95 | 2663 ms / 50 ms (10 request, `/metrics`; request đầu chậm do fetch prompt lần đầu) | | |
 | Retrieval success rate | 100% (10/10 `tool_success=true`) | | |
 
 ## 4. Logging và PII
 
-- **Cách tạo/nhận và truyền correlation ID:**
-- **Các metadata được ghi vào structured log:**
-- **Cách bảo đảm PII được scrub trước khi ghi:**
-- **Cách kiểm chứng kết quả:**
+- **Cách tạo/nhận và truyền correlation ID:** [`app/middleware.py`](../app/middleware.py) gọi `clear_contextvars()` đầu mỗi request, nhận header `x-request-id` nếu đúng format `req-<8-hex>` (header sai format bị bỏ, sinh ID mới bằng `uuid4().hex[:8]` để tránh log injection), bind vào structlog contextvars, gán `request.state.correlation_id` để agent đưa vào trace metadata và trả lại qua header `x-request-id` cùng `x-response-time-ms`.
+- **Các metadata được ghi vào structured log:** `ts`, `level`, `service`, `event`, `correlation_id`, `user_id_hash` (SHA-256 cắt 12 ký tự, không ghi user_id gốc), `session_id`, `feature`, `model`, `env`; `response_sent` thêm `latency_ms`, `ttft_ms`, `tokens_in/out`, `cost_usd`, `quality_score`, `tool_name`, `tool_success`. Context được bind trong [`app/main.py`](../app/main.py) trước dòng `request_received`, nên mọi log sau đó trong request đều mang cùng metadata.
+- **Cách bảo đảm PII được scrub trước khi ghi:** processor `scrub_event` trong [`app/logging_config.py`](../app/logging_config.py) được đặt sau `format_exc_info` (để cả stack trace dạng text cũng bị scrub) và **trước** `JsonlFileProcessor`/`JSONRenderer`; nó scrub đệ quy mọi string trong event (dict/list lồng nhau), không chỉ `payload`. [`app/pii.py`](../app/pii.py) có pattern email, thẻ thanh toán, CCCD 12 số, điện thoại VN (0/+84, có khoảng trắng/chấm/gạch) và hộ chiếu VN; thẻ và CCCD được che trước điện thoại để tránh cắt nhầm chuỗi số dài.
+- **Cách kiểm chứng kết quả:** `validate_logs.py` 100/100; gửi request chứa email/điện thoại/CCCD/thẻ giả với `x-request-id: req-0000beef` → response trả đúng ID và log chỉ còn `[REDACTED_*]` ([05](evidence/05-pii-redaction.txt)); tests mới trong [`tests/test_pii.py`](../tests/test_pii.py) và [`tests/test_middleware.py`](../tests/test_middleware.py) kiểm tra định dạng ID, tái sử dụng header hợp lệ, từ chối header sai và không rò context giữa hai request.
 
 ## 5. Tracing và prompt versioning
 
