@@ -1,0 +1,31 @@
+Langfuse traces trong khoảng 2026-09-29T08:39:00Z → 2026-09-29T08:41:00Z: 15
+trace_id                           correlation_id start (UTC)              root_ms observations
+620d8670c58353760b62e274c4888403   req-b11fea61   2026-09-29T08:39:40.066Z     159 AGENT,RETRIEVER,GENERATION
+1719311e8ace1fdf5fcd4a17c7b22b05   req-8502580a   2026-09-29T08:39:40.231Z     153 AGENT,RETRIEVER,GENERATION
+f8613163d26507a9c273d1db7b34c4e7   req-fb723923   2026-09-29T08:39:40.391Z     153 AGENT,RETRIEVER,GENERATION
+706c568d8065b4cd7731fe39c065f5f0   req-c858b24d   2026-09-29T08:39:40.550Z     153 RETRIEVER,AGENT,GENERATION
+c02feb0f57efd1a6bd28978cc7442f89   req-d61e9a78   2026-09-29T08:39:40.709Z     153 AGENT,RETRIEVER,GENERATION
+eb3c6b3810dca56a1c3808327e7c3d29   req-a7e688ec   2026-09-29T08:39:40.873Z     154 AGENT,RETRIEVER,GENERATION
+21c92086b1c41f86dca5ffda7e09dcfe   req-a4441648   2026-09-29T08:39:41.032Z     155 AGENT,RETRIEVER,GENERATION
+84deee9acb1fc4e0e49f8efb4276e78b   req-e8e93506   2026-09-29T08:39:41.194Z     153 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         153ms level=DEFAULT
+        metadata={"correlation_id": "req-e8e93506", "model": "claude-sonnet-4-5", "feature": "qa", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat", "query_preview": "How do I debug tail latency?", "doc_count": 1}
+    - RETRIEVER  retrieval      child of 971e94026bc2aea1    1ms level=DEFAULT
+        metadata={"correlation_id": "req-e8e93506", "model": "claude-sonnet-4-5", "feature": "qa", "retrieval_ms": 0, "tool_success": true}
+    - GENERATION llm-generate   child of 971e94026bc2aea1    151ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v1 usage={'input': 27, 'output': 130, 'total': 157} cost={'input': 8.1e-05, 'output': 0.00195, 'total': 0.002031} ttft_s=0.05
+        metadata={"correlation_id": "req-e8e93506", "model": "claude-sonnet-4-5", "feature": "qa", "ttft_ms": 50, "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat"}
+f919baa0912b00bf91a5d6e7e69dda13   req-2cc95f86   2026-09-29T08:39:41.353Z     154 AGENT,RETRIEVER,GENERATION
+6f860850c32c2cfd8b9fc25c97130063   req-d40935b6   2026-09-29T08:39:41.512Z     152 AGENT,RETRIEVER,GENERATION
+531fc82d86e6a99ebc322da2369cb17c   req-a2bbad00   2026-09-29T08:39:48.916Z    2655 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         2655ms level=DEFAULT
+        metadata={"correlation_id": "req-a2bbad00", "model": "claude-sonnet-4-5", "feature": "monitoring", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat", "query_preview": "Describe how to prove a slow span is the root cause.", "doc_count": 1}
+    - RETRIEVER  retrieval      child of 938e593c11f9408a    2501ms level=DEFAULT
+        metadata={"correlation_id": "req-a2bbad00", "model": "claude-sonnet-4-5", "feature": "monitoring", "retrieval_ms": 2500, "tool_success": true}
+    - GENERATION llm-generate   child of 938e593c11f9408a    152ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v1 usage={'input': 35, 'output': 116, 'total': 151} cost={'input': 0.000105, 'output': 0.00174, 'total': 0.001845} ttft_s=0.05
+        metadata={"correlation_id": "req-a2bbad00", "model": "claude-sonnet-4-5", "feature": "monitoring", "ttft_ms": 50, "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat"}
+90488f3d03cb2bd090aaa4c76d14c02c   req-59b4cb7d   2026-09-29T08:39:51.576Z    2654 RETRIEVER,AGENT,GENERATION
+1410a90694de9d4e7f4dfaaac45a3c51   req-84fb7116   2026-09-29T08:39:54.237Z    2655 AGENT,RETRIEVER,GENERATION
+c01050c4a155c382448bf1108401bc10   req-046ad6df   2026-09-29T08:39:56.897Z    2654 RETRIEVER,AGENT,GENERATION
+7212b57b4882437498bf4c6d93b79c4a   req-605c6f66   2026-09-29T08:39:59.556Z    2656 AGENT,RETRIEVER,GENERATION
