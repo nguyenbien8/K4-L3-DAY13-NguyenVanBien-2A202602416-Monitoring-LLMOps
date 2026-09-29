@@ -8,7 +8,7 @@
 - **MSSV:** 2A202602416
 - **Lớp:** K4-L3A
 - **Repository URL:** https://github.com/nguyenbien8/K4-L3-DAY13-NguyenVanBien-2A202602416-Monitoring-LLMOps
-- **Commit SHA cuối:**
+- **Commit SHA cuối:** commit cuối trên nhánh `main` (SHA nộp trên LMS/Codelabs, xem `git log -1 --oneline`)
 - **Challenge ID:** `day13-k4-l3a-monitoring-llmops-v1` (cohort K4, seed 1311)
 - **Tên project Langfuse cá nhân:** `day13-k4-l3a-2A202602416`
 
@@ -18,32 +18,32 @@
 
 | Evidence | Đường dẫn |
 |---|---|
-| Pytest cuối | `evidence/01-pytest.png` |
+| Pytest cuối | [`evidence/01-pytest.txt`](evidence/01-pytest.txt) |
 | Log validator | [`evidence/02-log-validator.txt`](evidence/02-log-validator.txt) |
 | Dashboard validator | [`evidence/03-dashboard-validator.txt`](evidence/03-dashboard-validator.txt) |
 | Structured log | [`evidence/04-structured-log.txt`](evidence/04-structured-log.txt) |
 | PII redaction | [`evidence/05-pii-redaction.txt`](evidence/05-pii-redaction.txt) |
-| Trace list | `evidence/06-trace-list.png` (ảnh Langfuse) + [`evidence/06-08-trace-summary.txt`](evidence/06-08-trace-summary.txt) |
-| Trace waterfall | `evidence/07-trace-waterfall.png` |
-| Trace metadata | `evidence/08-trace-metadata.png` (ảnh Langfuse) + [`evidence/06-08-trace-summary.txt`](evidence/06-08-trace-summary.txt) |
-| Prompt versions | `evidence/09-prompt-versions.png` |
-| Prompt rollback | `evidence/10-prompt-rollback.png` (ảnh Langfuse) + [`evidence/10-prompt-rollback.txt`](evidence/10-prompt-rollback.txt) |
+| Trace list | [`evidence/06-trace-list.png`](evidence/06-trace-list.png) + [`evidence/06-08-trace-summary.txt`](evidence/06-08-trace-summary.txt) |
+| Trace waterfall | [`evidence/07-trace-waterfall.png`](evidence/07-trace-waterfall.png) |
+| Trace metadata | [`evidence/08-trace-metadata.png`](evidence/08-trace-metadata.png) + [`evidence/06-08-trace-summary.txt`](evidence/06-08-trace-summary.txt) |
+| Prompt versions | [`evidence/09-prompt-versions.png`](evidence/09-prompt-versions.png) |
+| Prompt rollback | [`evidence/10-prompt-rollback.png`](evidence/10-prompt-rollback.png) (trái: production → v2; phải: rollback về v1) + [`evidence/10-prompt-rollback.txt`](evidence/10-prompt-rollback.txt) |
 | Dashboard runtime | [`evidence/11-dashboard-overview.png`](evidence/11-dashboard-overview.png) |
 | Incident metric | [`evidence/12-incident-metric.png`](evidence/12-incident-metric.png) |
 | Incident log | [`evidence/13-incident-log.txt`](evidence/13-incident-log.txt) |
-| Incident trace | `evidence/14-incident-trace.png` (ảnh Langfuse) + [`evidence/14-incident-trace.txt`](evidence/14-incident-trace.txt) |
+| Incident trace | [`evidence/14-incident-trace.png`](evidence/14-incident-trace.png) + [`evidence/14-incident-trace.txt`](evidence/14-incident-trace.txt) |
 
 ## 3. Kết quả kỹ thuật
 
 | Nội dung | Baseline | Kết quả cuối | Nhận xét |
 |---|---|---|---|
-| `validate_logs.py` | 30/100 — thiếu `correlation_id` (MISSING), thiếu enrichment, 0 correlation ID ([output](evidence/00-baseline-log-validator.txt)) | 100/100 sau CP1 (23 records, 11 correlation ID, 0 PII leak) | Log baseline được chuyển ra ngoài repo trước khi đo lại |
+| `validate_logs.py` | 30/100 — thiếu `correlation_id` (MISSING), thiếu enrichment, 0 correlation ID ([output](evidence/00-baseline-log-validator.txt)) | 100/100 (192 records, 93 correlation ID, 0 PII leak) | Log baseline được chuyển ra ngoài repo trước khi đo lại |
 | `validate_dashboard.py` | HỢP LỆ 6/6 ([output](evidence/00-baseline-dashboard-validator.txt)) | HỢP LỆ 6/6 | Contract giữ nguyên; dashboard runtime dựng từ `data/logs.jsonl` |
 | `pytest` | 22 passed ([output](evidence/00-baseline-pytest.txt)) | 33 passed ([output](evidence/01-pytest.txt)) | Thêm tests middleware, PII, child observations |
 | Số traces hợp lệ | Trace chỉ có 1 observation (`lab-agent-run`) | 24 traces 07:59–08:10 UTC có đủ AGENT → RETRIEVER + GENERATION ([summary](evidence/06-08-trace-summary.txt)) | Mỗi trace có `correlation_id` trong metadata |
-| Số PII leak | 0 (starter đã dùng `summarize_text` cho preview) | 0 — scrub toàn bộ event trước khi ghi file | Thêm processor + pattern passport, tests cho CCCD/thẻ |
+| Số PII leak | 0 (starter đã dùng `summarize_text` cho preview) | 0 trên 192 records — scrub toàn bộ event trước khi ghi file | Thêm processor + pattern passport, tests cho CCCD/thẻ |
 | Latency P95 / TTFT P95 | 2663 ms / 50 ms (10 request, `/metrics`; request đầu chậm do fetch prompt lần đầu) | 1841 ms / 50 ms (76 request, dashboard) | Steady-state ~155 ms; request chậm là request đầu sau restart (cold fetch prompt) |
-| Retrieval success rate | 100% (10/10 `tool_success=true`) | 100% (76/76) | Chưa có incident |
+| Retrieval success rate | 100% (10/10 `tool_success=true`) | 100% (incident `rag_slow` làm chậm, không làm lỗi retrieval) | Retrieval success không phát hiện được `rag_slow`; cần latency theo span |
 
 ## 4. Logging và PII
 
@@ -83,20 +83,20 @@
 
 ## 8. Giải thích và tự đánh giá
 
-- **Một quyết định kỹ thuật quan trọng và lý do:**
-- **Một lỗi/blocker đã gặp:**
-- **Cách tìm nguyên nhân và xử lý:**
-- **Cách hiểu luồng Metrics → Logs → Traces:**
-- **Vai trò của prompt version, token/cost, SLO hoặc rollback trong vận hành LLM:**
-- **Điều quan trọng nhất đã học:**
-- **Hạn chế hoặc phần chưa hoàn thành, nếu có:**
+- **Một quyết định kỹ thuật quan trọng và lý do:** chỉ gửi preview đã scrub (`summarize_text`) vào input/output của observation thay vì raw prompt/output. Raw prompt chứa nguyên câu hỏi người dùng (có email, số thẻ trong sample queries), nếu gửi lên Langfuse thì PII rò sang hệ thống thứ ba dù log đã sạch. Đổi lại vẫn giữ được model, usage, cost, prompt version để debug, và `correlation_id`/`trace_id` để tra ngược log khi cần chi tiết.
+- **Một lỗi/blocker đã gặp:** (1) trace của request dùng label `baseline` (`req-0000b001`) không xuất hiện trên Langfuse; (2) API cũ `GET /api/public/traces/{id}` trả 410 `LEGACY_API_UNAVAILABLE_FOR_NEW_ORGANIZATION`.
+- **Cách tìm nguyên nhân và xử lý:** (1) log có `response_sent` nhưng Langfuse không có trace, nên lỗi nằm ở bước export. Langfuse SDK gửi span theo batch nền, mà tôi đã kill process ngay sau request nên buffer bị mất. Tôi thêm `get_langfuse_client().flush()` trong lifespan shutdown của [`app/main.py`](../app/main.py), chờ exporter trước khi restart, rồi chạy lại (`req-0000b005`). (2) đọc thông báo lỗi và chuyển sang `GET /api/public/v2/observations` trong [`scripts/export_traces.py`](../scripts/export_traces.py).
+- **Cách hiểu luồng Metrics → Logs → Traces:** metrics trả lời *có vấn đề gì và khi nào*: P95 tăng lên 2654 ms lúc 08:40 trong khi TTFT/error/cost bình thường, nên loại trừ LLM và lỗi. Logs trả lời *request nào bị ảnh hưởng*: lọc `latency_ms > 2000` ra 5 request `feature=monitoring`, lấy `req-a2bbad00` và `trace_id`. Traces trả lời *bước nào là nguyên nhân*: span `retrieval` chiếm 2501/2655 ms. `correlation_id` là khóa nối log và trace; mỗi lớp thu hẹp phạm vi cho lớp sau.
+- **Vai trò của prompt version, token/cost, SLO hoặc rollback trong vận hành LLM:** prompt là "code" của LLM app nhưng đổi được không cần deploy. Label + version trong trace cho biết chính xác request nào dùng prompt nào (v2 làm `tokens_in` tăng 32 → 47, tức ~47% chi phí input). Nếu v2 làm hỏng chất lượng hoặc đội cost, chỉ cần chuyển label `production` về v1 là rollback trong vài giây, có trace chứng minh. SLO/error budget biến "chậm" thành con số có thể ra quyết định (được phép 0.5% request > 3 s), còn alert cost/request phát hiện prompt hoặc output dài bất thường trước khi vượt ngân sách.
+- **Điều quan trọng nhất đã học:** observability phải được thiết kế để *nối* được các tín hiệu. Metric đẹp mà không có correlation ID thì không tìm được request, trace không có child span thì không khoanh vùng được bước chậm. Redaction phải xảy ra trước khi dữ liệu rời process, cả với log lẫn trace.
+- **Hạn chế hoặc phần chưa hoàn thành, nếu có:** `latency_ms` chỉ đo thời gian trong agent nên không thấy thời gian xếp hàng khi event loop bị chặn (server 2.65 s, client 8–13 s); nên log thêm thời gian của middleware (`x-response-time-ms`). Fix action trong CP3 (timeout/fallback, `run_in_threadpool`) mới được đề xuất, chưa triển khai. Dashboard là ảnh tĩnh sinh bằng script, chưa phải dashboard live có refresh; alert rules mới là cấu hình, chưa nối Slack thật.
 
 ## 9. Checklist trước khi nộp
 
-- [ ] Kết quả và evidence thuộc commit SHA cuối.
-- [ ] Tất cả ảnh/output mở được bằng đường dẫn tương đối.
-- [ ] Incident evidence nối đúng metric → log → trace.
-- [ ] Trace/prompt evidence thuộc project Langfuse cá nhân và ảnh không lộ key/secret.
-- [ ] Repository chạy lại được theo README.
-- [ ] Không có secret, API key, PII thô hoặc evidence của người khác/lớp khác.
+- [x] Kết quả và evidence thuộc commit SHA cuối.
+- [x] Tất cả ảnh/output mở được bằng đường dẫn tương đối.
+- [x] Incident evidence nối đúng metric → log → trace.
+- [x] Trace/prompt evidence thuộc project Langfuse cá nhân và ảnh không lộ key/secret.
+- [x] Repository chạy lại được theo README.
+- [x] Không có secret, API key, PII thô hoặc evidence của người khác/lớp khác.
 - [ ] URL repo và commit SHA cuối đã được nộp trên LMS/Codelabs.
