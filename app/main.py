@@ -14,7 +14,7 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
-from .tracing import tracing_enabled
+from .tracing import get_langfuse_client, tracing_enabled
 
 configure_logging()
 log = get_logger()
@@ -30,6 +30,9 @@ async def lifespan(_: FastAPI):
         payload={"tracing_enabled": tracing_enabled()},
     )
     yield
+    # Đẩy các span còn trong buffer lên Langfuse trước khi process dừng.
+    if tracing_enabled():
+        get_langfuse_client().flush()
 
 
 app = FastAPI(title="Day 13 Monitoring & LLMOps Lab", lifespan=lifespan)
@@ -78,6 +81,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             tokens_out=result.tokens_out,
             cost_usd=result.cost_usd,
             quality_score=result.quality_score,
+            trace_id=result.trace_id,
             tool_name="retrieval",
             tool_success=True,
             payload={"answer_preview": summarize_text(result.answer)},

@@ -1,25 +1,31 @@
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: HighLatencyP95
+    severity: P2
+    condition: 'percentile(response_sent.latency_ms, 95) > 3000 over 5m window'
+    duration: 5m
     type: symptom-based
+    slo: fast_successful_requests
     channel: slack
-    owner: TODO
-    runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
-    duration: TODO
+    slack_channel: '#day13-k4-l3a-alerts'
+    owner: nguyenvanbien-oncall
+    runbook: docs/alerts.md#alert-1-highlatencyp95
+  - name: HighErrorRate
+    severity: P1
+    condition: 'count(request_failed) / count(request_received) * 100 > 2 over 5m window (or retrieval success < 90%)'
+    duration: 5m
     type: symptom-based
+    slo: fast_successful_requests
     channel: slack
-    owner: TODO
-    runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
-    duration: TODO
+    slack_channel: '#day13-k4-l3a-alerts'
+    owner: nguyenvanbien-oncall
+    runbook: docs/alerts.md#alert-2-higherrorrate
+  - name: CostPerRequestSpike
+    severity: P3
+    condition: 'sum(response_sent.cost_usd) / count(response_sent) > 0.004 USD over 15m window (2x baseline)'
+    duration: 15m
     type: symptom-based
+    slo: guardrails.avg_cost_per_request_usd_max
     channel: slack
-    owner: TODO
-    runbook: docs/alerts.md#alert-3
+    slack_channel: '#day13-k4-l3a-alerts'
+    owner: nguyenvanbien-oncall
+    runbook: docs/alerts.md#alert-3-costperrequestspike

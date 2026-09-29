@@ -1,0 +1,21 @@
+Prompt day13-chat — project Langfuse day13-k4-l3a-2A202602416
+Cùng input: {"feature":"qa","message":"Explain why metrics traces and logs work together"}
+
+Trạng thái ban đầu (tạo bằng Langfuse SDK create_prompt):
+  v1 labels ['baseline', 'production']   template: Feature/Docs/Question
+  v2 labels ['candidate', 'latest']      template: + "Answer concisely in at most 3 sentences and cite the docs."
+
+LANGFUSE_PROMPT_LABEL=baseline   -> req-0000b005 -> trace 8f5417c7dc313ba7e42b0440a18625ee  prompt v1  tokens_in=32
+LANGFUSE_PROMPT_LABEL=candidate  -> req-0000c002 -> trace 5a7e136d0eb17ed1372df985ab1e7cd6  prompt v2  tokens_in=47
+
+PROMOTE production -> v2 (update_prompt(version=2, new_labels=[production, candidate])):
+2026-09-29T08:02:51+00:00 v1 ['baseline']
+2026-09-29T08:02:51+00:00 v2 ['production', 'candidate', 'latest']
+LANGFUSE_PROMPT_LABEL=production -> req-0000d003 -> trace b6e58ea78f89eb70be9250abc42f5739  prompt v2  tokens_in=47
+
+ROLLBACK production -> v1 (update_prompt(version=1, new_labels=[production, baseline])):
+2026-09-29T08:03:03+00:00 v1 ['production', 'baseline']
+2026-09-29T08:03:03+00:00 v2 ['candidate', 'latest']
+LANGFUSE_PROMPT_LABEL=production -> req-0000e004 -> trace 87bdcab013c80f4de71243ba053b4d02  prompt v1  tokens_in=32
+
+Chi tiết observation/metadata của 4 trace: xem 06-08-trace-summary.txt

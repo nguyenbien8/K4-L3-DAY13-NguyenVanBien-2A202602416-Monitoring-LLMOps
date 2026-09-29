@@ -7,9 +7,25 @@ primary_slo:
     total_event: 'event == "request_received"'
   target_percent: 99.5
   error_budget_percent: 0.5
-  note: Học viên phải giải thích hoặc điều chỉnh ngưỡng bằng baseline của mình.
+  # Baseline đo trên data/logs.jsonl (76 request, 2026-09-29):
+  #   P50 153 ms, P95 1841 ms, P99 2253 ms, TTFT P95 50 ms, error rate 0%.
+  #   Request chậm (~1.5-2.5 s) là request đầu sau khi process khởi động, do fetch prompt
+  #   từ Langfuse (cache 60 s); steady-state chỉ ~155 ms.
+  # Giữ ngưỡng 3000 ms (= threshold panel latency) để có headroom ~1.2 s trên P99 baseline
+  # nhưng vẫn bắt được incident rag_slow (retrieval +2.5 s => latency > 2.6 s, cộng fetch prompt > 3 s).
+  # Target 99.5% thay vì 99.9% vì app phụ thuộc Langfuse Cloud bên ngoài (cold fetch) và là lab một instance.
+  error_budget:
+    formula: 'budget_bad_events = (1 - target_percent/100) * total_events'
+    example_monthly_traffic: 100000
+    example_bad_events_allowed: 500      # 0.5% x 100,000 request / 28 ngày
+    time_equivalent_minutes: 201.6       # 0.5% x 28 x 24 x 60 phút nếu hỏng toàn phần
+    burn_rate_alerts:
+      fast_burn: {burn_rate: 14.4, long_window: 1h, short_window: 5m, consumes: '2% budget / 1h'}
+      slow_burn: {burn_rate: 6, long_window: 6h, short_window: 30m, consumes: '5% budget / 6h'}
+  note: Ngưỡng được giải thích từ baseline thực tế ở trên; xem submission/REPORT.md mục 6.
 guardrails:
   error_rate_pct_max: 2
   daily_cost_usd_max: 2.5
+  avg_cost_per_request_usd_max: 0.004    # baseline ~0.002 USD/request; x2 = bất thường
   quality_score_avg_min: 0.75
   retrieval_success_rate_pct_min: 90

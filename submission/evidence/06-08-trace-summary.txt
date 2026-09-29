@@ -1,0 +1,54 @@
+Langfuse traces trong khoảng 2026-09-29T07:59:00Z → 2026-09-29T08:10:00Z: 24
+trace_id                           correlation_id start (UTC)              root_ms observations
+7ca87fce969caf43f80b6dd67dc2d00a   req-0ffa72f5   2026-09-29T08:01:52.059Z    1545 AGENT,RETRIEVER,GENERATION
+5a19a4e82b38f82efc1b0476c5442a06   req-7be271a1   2026-09-29T08:01:53.613Z     154 AGENT,RETRIEVER,GENERATION
+e1d25d3746e0c7741723629cffd0c02f   req-69f95863   2026-09-29T08:01:53.775Z     154 AGENT,RETRIEVER,GENERATION
+0ee331ceea26f388a202e905e7ac4a51   req-edeef7ae   2026-09-29T08:01:53.940Z     153 AGENT,RETRIEVER,GENERATION
+6273c9071b2815f4a16b2c72d93be459   req-7e98f733   2026-09-29T08:01:54.100Z     154 AGENT,RETRIEVER,GENERATION
+aab77809d7fb7d80e4cf617767960c42   req-eb48b9ae   2026-09-29T08:01:54.264Z     153 AGENT,RETRIEVER,GENERATION
+d2cb5a9ff99fe7c352baefd78d2d28db   req-82085870   2026-09-29T08:01:54.425Z     153 AGENT,RETRIEVER,GENERATION
+898c574b69fdfc46931cd4a36e003645   req-a879ca94   2026-09-29T08:01:54.587Z     153 RETRIEVER,AGENT,GENERATION
+cf3ab998165e1146bf5ed119a5147b7e   req-487e000d   2026-09-29T08:01:54.748Z     155 AGENT,RETRIEVER,GENERATION
+351198e40ef22c9e4392e62f4dad8127   req-35d82a1c   2026-09-29T08:01:54.910Z     152 RETRIEVER,AGENT,GENERATION
+5597671350a0184c5986d90b75a3d0bb   req-7cee082b   2026-09-29T08:01:56.160Z     153 AGENT,RETRIEVER,GENERATION
+5a2d042d886eda02904cfd1c01fcb0f3   req-0b94eb95   2026-09-29T08:01:56.318Z     153 RETRIEVER,AGENT,GENERATION
+4d546fbc9afa5f130c3d89c0c603093a   req-23dcaa20   2026-09-29T08:01:56.476Z     153 AGENT,RETRIEVER,GENERATION
+3316cf7151b4158ad0f1f7adffbd264f   req-f9e016c9   2026-09-29T08:01:56.636Z     154 RETRIEVER,AGENT,GENERATION
+6dd290835a654c739b5daa3e3dd8b385   req-22d45d57   2026-09-29T08:01:56.795Z     154 AGENT,RETRIEVER,GENERATION
+be6ac58c19d59e1efad9e6c42c9985d5   req-2ea3a4b2   2026-09-29T08:01:56.958Z     154 AGENT,RETRIEVER,GENERATION
+17c83d71e666c3ee724e4aa36e3ff4ce   req-827296f4   2026-09-29T08:01:57.118Z     154 AGENT,GENERATION,RETRIEVER
+6d2ad609570c003b7a46813544be48c1   req-c1cf595c   2026-09-29T08:01:57.278Z     154 AGENT,RETRIEVER,GENERATION
+968c13b171f6a1e7e0fd82db87da7786   req-fade2590   2026-09-29T08:01:57.437Z     175 AGENT,RETRIEVER,GENERATION
+dfe471ca7035c7346f1e9e5f831ad578   req-a0d484f0   2026-09-29T08:01:57.619Z     155 AGENT,RETRIEVER,GENERATION
+5a7e136d0eb17ed1372df985ab1e7cd6   req-0000c002   2026-09-29T08:02:30.640Z    2180 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         2180ms level=DEFAULT
+        metadata={"correlation_id": "req-0000c002", "model": "claude-sonnet-4-5", "feature": "qa", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 2, "prompt_label": "candidate", "prompt_name": "day13-chat", "query_preview": "Explain why metrics traces and logs work together", "doc_count": 1}
+    - RETRIEVER  retrieval      child of be27a1ae7298152a    0ms level=DEFAULT
+        metadata={"correlation_id": "req-0000c002", "model": "claude-sonnet-4-5", "feature": "qa", "retrieval_ms": 0, "tool_success": true}
+    - GENERATION llm-generate   child of be27a1ae7298152a    152ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v2 usage={'input': 47, 'output': 152, 'total': 199} cost={'input': 0.000141, 'output': 0.00228, 'total': 0.002421} ttft_s=0.051
+        metadata={"correlation_id": "req-0000c002", "model": "claude-sonnet-4-5", "feature": "qa", "ttft_ms": 50, "prompt_version": 2, "prompt_label": "candidate", "prompt_name": "day13-chat"}
+b6e58ea78f89eb70be9250abc42f5739   req-0000d003   2026-09-29T08:02:56.234Z    1666 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         1666ms level=DEFAULT
+        metadata={"correlation_id": "req-0000d003", "model": "claude-sonnet-4-5", "feature": "qa", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 2, "prompt_label": "production", "prompt_name": "day13-chat", "query_preview": "Explain why metrics traces and logs work together", "doc_count": 1}
+    - RETRIEVER  retrieval      child of ad4e7e30bdf560d7    1ms level=DEFAULT
+        metadata={"correlation_id": "req-0000d003", "model": "claude-sonnet-4-5", "feature": "qa", "retrieval_ms": 0, "tool_success": true}
+    - GENERATION llm-generate   child of ad4e7e30bdf560d7    152ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v2 usage={'input': 47, 'output': 112, 'total': 159} cost={'input': 0.000141, 'output': 0.00168, 'total': 0.001821} ttft_s=0.05
+        metadata={"correlation_id": "req-0000d003", "model": "claude-sonnet-4-5", "feature": "qa", "ttft_ms": 50, "prompt_version": 2, "prompt_label": "production", "prompt_name": "day13-chat"}
+87bdcab013c80f4de71243ba053b4d02   req-0000e004   2026-09-29T08:03:08.706Z    1582 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         1582ms level=DEFAULT
+        metadata={"correlation_id": "req-0000e004", "model": "claude-sonnet-4-5", "feature": "qa", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat", "query_preview": "Explain why metrics traces and logs work together", "doc_count": 1}
+    - RETRIEVER  retrieval      child of e6bc3ff56705685b    1ms level=DEFAULT
+        metadata={"correlation_id": "req-0000e004", "model": "claude-sonnet-4-5", "feature": "qa", "retrieval_ms": 0, "tool_success": true}
+    - GENERATION llm-generate   child of e6bc3ff56705685b    151ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v1 usage={'input': 32, 'output': 179, 'total': 211} cost={'input': 9.6e-05, 'output': 0.002685, 'total': 0.002781} ttft_s=0.05
+        metadata={"correlation_id": "req-0000e004", "model": "claude-sonnet-4-5", "feature": "qa", "ttft_ms": 50, "prompt_version": 1, "prompt_label": "production", "prompt_name": "day13-chat"}
+8f5417c7dc313ba7e42b0440a18625ee   req-0000b005   2026-09-29T08:05:57.449Z    1518 AGENT,RETRIEVER,GENERATION
+    - AGENT      lab-agent-run  ROOT                         1518ms level=DEFAULT
+        metadata={"correlation_id": "req-0000b005", "model": "claude-sonnet-4-5", "feature": "qa", "prompt_fetch_error": "", "prompt_source": "langfuse", "prompt_version": 1, "prompt_label": "baseline", "prompt_name": "day13-chat", "query_preview": "Explain why metrics traces and logs work together", "doc_count": 1}
+    - RETRIEVER  retrieval      child of d24c498a58a5620f    1ms level=DEFAULT
+        metadata={"correlation_id": "req-0000b005", "model": "claude-sonnet-4-5", "feature": "qa", "retrieval_ms": 0, "tool_success": true}
+    - GENERATION llm-generate   child of d24c498a58a5620f    152ms level=DEFAULT
+        model=claude-sonnet-4-5 prompt=day13-chat v1 usage={'input': 32, 'output': 130, 'total': 162} cost={'input': 9.6e-05, 'output': 0.00195, 'total': 0.002046} ttft_s=0.051
+        metadata={"correlation_id": "req-0000b005", "model": "claude-sonnet-4-5", "feature": "qa", "ttft_ms": 50, "prompt_version": 1, "prompt_label": "baseline", "prompt_name": "day13-chat"}

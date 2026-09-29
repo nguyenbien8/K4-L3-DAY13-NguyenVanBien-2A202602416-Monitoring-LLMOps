@@ -32,8 +32,32 @@ except ImportError:  # pragma: no cover - chỉ dùng khi chưa cài requirement
         yield
 
 
+class _NoopObservation:
+    def update(self, **kwargs: Any) -> None:
+        return None
+
+
 def get_langfuse_client():
     return get_client()
+
+
+@contextmanager
+def start_child_observation(client: Any, **kwargs: Any):
+    """Mở child observation dưới observation hiện tại; no-op nếu client không hỗ trợ."""
+    starter = getattr(client, "start_as_current_observation", None)
+    if not callable(starter):
+        yield _NoopObservation()
+        return
+    with starter(**kwargs) as observation:
+        yield observation
+
+
+def current_trace_id(client: Any) -> str | None:
+    getter = getattr(client, "get_current_trace_id", None)
+    try:
+        return getter() if callable(getter) else None
+    except Exception:  # tracing không được làm hỏng request
+        return None
 
 
 def tracing_enabled() -> bool:

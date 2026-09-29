@@ -3,13 +3,21 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 from . import metrics
 from .mock_llm import FakeLLM
 from .mock_rag import retrieve
 from .pii import hash_user_id, summarize_text
 from .prompt_management import resolve_prompt
-from .tracing import get_langfuse_client, observe, propagate_attributes, tracing_enabled
+from .tracing import (
+    current_trace_id,
+    get_langfuse_client,
+    observe,
+    propagate_attributes,
+    start_child_observation,
+    tracing_enabled,
+)
 
 
 @dataclass
@@ -21,6 +29,7 @@ class AgentResult:
     tokens_out: int
     cost_usd: float
     quality_score: float
+    trace_id: str | None = None
 
 
 class LabAgent:
@@ -51,7 +60,30 @@ class LabAgent:
             },
         ):
             started = time.perf_counter()
-            docs = retrieve(message)
+            trace_id = current_trace_id(langfuse_client)
+            with start_child_observation(
+                langfuse_client,
+                name="retrieval",
+                as_type="retriever",
+                input={"query_preview": summarize_text(message)},
+            ) as retrieval_obs:
+                retrieval_started = time.perf_counter()
+                try:
+                    docs = retrieve(message)
+                except Exception as exc:
+                    retrieval_obs.update(
+                        level="ERROR",
+                        status_message=type(exc).__name__,
+                        metadata={"tool_success": False, "error_type": type(exc).__name__},
+                    )
+                    raise
+                retrieval_obs.update(
+                    output={"doc_count": len(docs)},
+                    metadata={
+                        "tool_success": True,
+                        "retrieval_ms": int((time.perf_counter() - retrieval_started) * 1000),
+                    },
+                )
             prompt = resolve_prompt(
                 langfuse_client,
                 feature=feature,
@@ -71,13 +103,40 @@ class LabAgent:
                 },
                 version=prompt.version,
             )
-            # TODO (CP2): instrument retrieve() and FakeLLM.generate() as child
-            # observations. The nested generation must receive prompt, usage and cost.
-            with propagate_attributes(prompt=prompt.managed_prompt):
+            # Generation chỉ nhận preview đã scrub, không capture raw prompt/output có thể chứa PII.
+            with propagate_attributes(prompt=prompt.managed_prompt), start_child_observation(
+                langfuse_client,
+                name="llm-generate",
+                as_type="generation",
+                model=self.model,
+                prompt=prompt.managed_prompt,
+                input={"prompt_preview": summarize_text(prompt.text, max_len=160)},
+                metadata={
+                    "prompt_name": prompt.name,
+                    "prompt_label": prompt.label,
+                    "prompt_version": prompt.version,
+                },
+            ) as generation_obs:
+                generation_started = datetime.now(timezone.utc)
                 response = self.llm.generate(prompt.text)
+                cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
+                generation_obs.update(
+                    output={"answer_preview": summarize_text(response.text)},
+                    completion_start_time=generation_started + timedelta(milliseconds=response.ttft_ms),
+                    usage_details={
+                        "input_tokens": response.usage.input_tokens,
+                        "output_tokens": response.usage.output_tokens,
+                        "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
+                    },
+                    cost_details={
+                        "input": self._estimate_cost(response.usage.input_tokens, 0),
+                        "output": self._estimate_cost(0, response.usage.output_tokens),
+                        "total": cost_usd,
+                    },
+                    metadata={"ttft_ms": response.ttft_ms},
+                )
             quality_score = self._heuristic_quality(message, response.text, docs)
             latency_ms = int((time.perf_counter() - started) * 1000)
-            cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
 
         metrics.record_request(
             latency_ms=latency_ms,
@@ -96,6 +155,7 @@ class LabAgent:
             tokens_out=response.usage.output_tokens,
             cost_usd=cost_usd,
             quality_score=quality_score,
+            trace_id=trace_id,
         )
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:

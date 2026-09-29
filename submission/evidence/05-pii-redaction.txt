@@ -1,4 +1,4 @@
-Input (PII gia, du lieu test): "Email test.user@example.com, phone 090 123 4567, CCCD 001099012345, card 4111-1111-1111-1111"
+Input (PII gia, du lieu test; khong ghi nguyen van vao evidence): "Email <email gia>, phone <SDT VN dang 090 xxx xxxx>, CCCD <12 so>, card <16 so dang xxxx-xxxx-xxxx-xxxx>"
 Request header: x-request-id: req-0000beef -> response header x-request-id: req-0000beef
 Log output trong data/logs.jsonl:
 {"service": "api", "payload": {"message_preview": "Email [REDACTED_EMAIL], phone [REDACTED_PHONE_VN], CCCD [REDACTED_CCCD], card [R..."}, "event": "request_received", "correlation_id": "req-0000beef", "session_id": "s-pii", "model": "claude-sonnet-4-5", "feature": "qa", "env": "dev", "user_id_hash": "4c5fd778540c", "level": "info", "ts": "2026-09-29T07:58:22.815070Z"}
