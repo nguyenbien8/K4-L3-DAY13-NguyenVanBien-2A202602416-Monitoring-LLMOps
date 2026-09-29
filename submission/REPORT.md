@@ -4,11 +4,11 @@
 
 ## 1. Thông tin học viên
 
-- **Họ và tên:** Nguyễn Văn Biên
+- **Họ và tên:** Nguyễn Văn Biển
 - **MSSV:** 2A202602416
 - **Lớp:** K4-L3A
 - **Repository URL:** https://github.com/nguyenbien8/K4-L3-DAY13-NguyenVanBien-2A202602416-Monitoring-LLMOps
-- **Commit SHA cuối:** commit cuối trên nhánh `main` (SHA nộp trên LMS/Codelabs, xem `git log -1 --oneline`)
+- **Commit SHA cuối:** `2dd6cba` (cp4 — commit chứa toàn bộ source, config, evidence và kết quả tests/validators cuối); các commit sau đó chỉ sửa thông tin học viên trong REPORT, không đổi code/evidence
 - **Challenge ID:** `day13-k4-l3a-monitoring-llmops-v1` (cohort K4, seed 1311)
 - **Tên project Langfuse cá nhân:** `day13-k4-l3a-2A202602416`
 
@@ -40,7 +40,7 @@
 | `validate_logs.py` | 30/100 — thiếu `correlation_id` (MISSING), thiếu enrichment, 0 correlation ID ([output](evidence/00-baseline-log-validator.txt)) | 100/100 (192 records, 93 correlation ID, 0 PII leak) | Log baseline được chuyển ra ngoài repo trước khi đo lại |
 | `validate_dashboard.py` | HỢP LỆ 6/6 ([output](evidence/00-baseline-dashboard-validator.txt)) | HỢP LỆ 6/6 | Contract giữ nguyên; dashboard runtime dựng từ `data/logs.jsonl` |
 | `pytest` | 22 passed ([output](evidence/00-baseline-pytest.txt)) | 33 passed ([output](evidence/01-pytest.txt)) | Thêm tests middleware, PII, child observations |
-| Số traces hợp lệ | Trace chỉ có 1 observation (`lab-agent-run`) | 24 traces 07:59–08:10 UTC có đủ AGENT → RETRIEVER + GENERATION ([summary](evidence/06-08-trace-summary.txt)) | Mỗi trace có `correlation_id` trong metadata |
+| Số traces hợp lệ | Trace chỉ có 1 observation (`lab-agent-run`) | ~96 traces trong project ([06](evidence/06-trace-list.png): Total ≈ 96), đều có AGENT → RETRIEVER + GENERATION; chi tiết 24 trace đợt prompt trong [summary](evidence/06-08-trace-summary.txt) | Mỗi trace có `correlation_id` trong metadata |
 | Số PII leak | 0 (starter đã dùng `summarize_text` cho preview) | 0 trên 192 records — scrub toàn bộ event trước khi ghi file | Thêm processor + pattern passport, tests cho CCCD/thẻ |
 | Latency P95 / TTFT P95 | 2663 ms / 50 ms (10 request, `/metrics`; request đầu chậm do fetch prompt lần đầu) | 1841 ms / 50 ms (76 request, dashboard) | Steady-state ~155 ms; request chậm là request đầu sau restart (cold fetch prompt) |
 | Retrieval success rate | 100% (10/10 `tool_success=true`) | 100% (incident `rag_slow` làm chậm, không làm lỗi retrieval) | Retrieval success không phát hiện được `rag_slow`; cần latency theo span |
@@ -56,7 +56,7 @@
 
 - **Cách xác nhận traces do chính tôi tạo trong project cá nhân:** key trong `.env` thuộc project `day13-k4-l3a-2A202602416` (`auth_check()` = True); mọi trace có `correlation_id` trùng với dòng trong `data/logs.jsonl` do tôi chạy `load_test.py`. [`scripts/export_traces.py`](../scripts/export_traces.py) gọi Langfuse API v2 observations để liệt kê 24 trace kèm correlation ID (bỏ các field `scope.*` chứa public key).
 - **Cấu trúc root/retrieval/generation observations:** root `lab-agent-run` (type `agent`, `@observe`) → child `retrieval` (type `retriever`, input là `query_preview` đã scrub, output `doc_count`, metadata `tool_success`, `level=ERROR` khi lỗi) → child `llm-generate` (type `generation`, có `model`, `prompt` managed của Langfuse, `usage_details` input/output/total, `cost_details` input/output/total theo giá $3/$15 per 1M token, `completion_start_time` để Langfuse tính TTFT). Không capture raw prompt/output, chỉ preview đã qua `scrub_text` ([`app/agent.py`](../app/agent.py), helper [`app/tracing.py`](../app/tracing.py)).
-- **Cách nối trace với log:** `correlation_id` được đưa vào trace metadata qua `propagate_attributes` (nên có ở cả root và mọi child), và log `response_sent` ghi thêm `trace_id` lấy từ `get_current_trace_id()`. Từ log có thể mở thẳng trace, từ trace có thể lọc log theo `correlation_id`.
+- **Cách nối trace với log:** `correlation_id` được đưa vào trace metadata qua `propagate_attributes` (vì vậy có ở cả root và mọi child), và log `response_sent` ghi thêm `trace_id` lấy từ `get_current_trace_id()`. Từ log có thể mở thẳng trace, từ trace có thể lọc log theo `correlation_id`.
 - **Prompt name:** `day13-chat` (text prompt, 3 biến `{{feature}}`, `{{docs}}`, `{{message}}`)
 - **Version/label baseline:** v1, labels `baseline` + `production`, template gốc
 - **Version/label candidate:** v2, label `candidate`, thêm dòng "Answer concisely in at most 3 sentences and cite the docs." (cùng input: `tokens_in` 32 → 47)
@@ -99,4 +99,4 @@
 - [x] Trace/prompt evidence thuộc project Langfuse cá nhân và ảnh không lộ key/secret.
 - [x] Repository chạy lại được theo README.
 - [x] Không có secret, API key, PII thô hoặc evidence của người khác/lớp khác.
-- [ ] URL repo và commit SHA cuối đã được nộp trên LMS/Codelabs.
+- [x] URL repo đã được nộp trên VLearn LMS (LMS chỉ có ô nộp link; commit SHA ghi ở mục 1).
